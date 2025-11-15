@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Wikiwand Redirect Logic</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+        }
+        .test-case {
+            border: 1px solid #ccc;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-case h3 {
+            margin-top: 0;
+            color: #2196F3;
+        }
+        .url-display {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 5px 0;
+            word-break: break-all;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+        .result {
+            background: #f9f9f9;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            word-break: break-all;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+        }
+        .success { border-left: 5px solid #4CAF50; }
+        .error { border-left: 5px solid #f44336; }
+        .warning { border-left: 5px solid #ff9800; }
+        button {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #1976D2;
+        }
+        button:active {
+            background: #0D47A1;
+        }
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        .info-box {
+            background: #E3F2FD;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2196F3;
+        }
+        .step {
+            color: #666;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔄 Wikiwand Redirect Logic Tester</h1>
+    
+    <div class="info-box">
+        <strong>ℹ️ About:</strong> This page tests the logic for redirecting Wikiwand URLs to simplified Chinese.
+        It simulates the exact behavior of the Tampermonkey userscript.
+    </div>
+
+    <div class="test-case">
+        <h3>Test Case 1: Portuguese Natsume Yūjin-chō</h3>
+        <p><strong>Input URL:</strong></p>
+        <div class="url-display">https://www.wikiwand.com/pt/articles/Natsume_Yūjin-chō</div>
+        <p><strong>Expected Output:</strong></p>
+        <div class="url-display">https://www.wikiwand.com/zh-cn/articles/夏目友人帳</div>
+        <button onclick="testCase1()">▶️ Run Test</button>
+        <div class="result" id="result1">Click button to run test...</div>
+    </div>
+
+    <div class="test-case">
+        <h3>Test Case 2: English Natsume's Book of Friends</h3>
+        <p><strong>Input URL:</strong></p>
+        <div class="url-display">https://www.wikiwand.com/en/articles/Natsume's_Book_of_Friends</div>
+        <p><strong>Expected Output:</strong></p>
+        <div class="url-display">https://www.wikiwand.com/zh-cn/articles/夏目友人帳</div>
+        <button onclick="testCase2()">▶️ Run Test</button>
+        <div class="result" id="result2">Click button to run test...</div>
+    </div>
+
+    <div class="test-case">
+        <h3>Test Case 3: URL with encoded characters</h3>
+        <p><strong>Input URL:</strong></p>
+        <div class="url-display">https://www.wikiwand.com/pt/articles/Natsume_Y%C5%ABjin-ch%C5%8D</div>
+        <p><strong>Expected Output:</strong></p>
+        <div class="url-display">https://www.wikiwand.com/zh-cn/articles/夏目友人帳</div>
+        <button onclick="testCase3()">▶️ Run Test</button>
+        <div class="result" id="result3">Click button to run test...</div>
+    </div>
+
+    <script>
+        function log(resultId, message, type = 'info') {
+            const resultDiv = document.getElementById(resultId);
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = type === 'step' ? '📍' : type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️';
+            resultDiv.innerHTML += `${prefix} [${timestamp}] ${message}\n`;
+            
+            if (type === 'success') {
+                resultDiv.parentElement.className = 'test-case success';
+            } else if (type === 'error') {
+                resultDiv.parentElement.className = 'test-case error';
+            } else if (type === 'warning') {
+                resultDiv.parentElement.className = 'test-case warning';
+            }
+            
+            // Auto-scroll to bottom
+            resultDiv.scrollTop = resultDiv.scrollHeight;
+        }
+
+        function clearLog(resultId) {
+            document.getElementById(resultId).innerHTML = '';
+            document.getElementById(resultId).parentElement.className = 'test-case';
+        }
+
+        async function testRedirectLogic(url, resultId) {
+            clearLog(resultId);
+            log(resultId, `Testing URL: ${url}`, 'step');
+
+            // Parse URL
+            const urlMatch = url.match(/^https:\/\/www\.wikiwand\.com\/([a-z\-]+)\/articles\/(.+?)(?:\?|#|$)/);
+            
+            if (!urlMatch) {
+                log(resultId, 'URL does not match expected pattern', 'error');
+                return;
+            }
+
+            const currentLang = urlMatch[1];
+            const articleSlugEncoded = urlMatch[2];
+            const articleSlug = decodeURIComponent(articleSlugEncoded);
+
+            log(resultId, `STEP 1: Parse URL`, 'step');
+            log(resultId, `  Language: ${currentLang}`);
+            log(resultId, `  Encoded Slug: ${articleSlugEncoded}`);
+            log(resultId, `  Decoded Slug: ${articleSlug}`);
+
+            // Convert to Wikipedia language
+            const wikiLangMap = {
+                'en': 'en', 'de': 'de', 'fr': 'fr', 'es': 'es', 'it': 'it',
+                'ja': 'ja', 'pt': 'pt', 'ru': 'ru', 'ar': 'ar', 'ko': 'ko',
+                'nl': 'nl', 'pl': 'pl', 'tr': 'tr', 'sv': 'sv', 'he': 'he',
+                'zh': 'zh', 'zh-tw': 'zh', 'zh-hk': 'zh'
+            };
+            const wikiLang = wikiLangMap[currentLang] || currentLang;
+            
+            // Convert slug to page title
+            const pageTitle = articleSlug.replace(/_/g, ' ');
+            
+            log(resultId, `\nSTEP 2: Prepare Wikipedia API Query`, 'step');
+            log(resultId, `  Wikipedia Language: ${wikiLang}`);
+            log(resultId, `  Page Title: ${pageTitle}`);
+
+            // Query Wikipedia API
+            const apiUrl = `https://${wikiLang}.wikipedia.org/w/api.php?` +
+                `action=query&` +
+                `format=json&` +
+                `prop=langlinks&` +
+                `titles=${encodeURIComponent(pageTitle)}&` +
+                `lllang=zh&` +
+                `llprop=url&` +
+                `redirects=1&` +
+                `origin=*`;
+
+            log(resultId, `\nSTEP 3: Query Wikipedia API`, 'step');
+            log(resultId, `  API URL: ${apiUrl}`);
+
+            try {
+                log(resultId, `  Sending request...`);
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+                
+                log(resultId, `  Response received`);
+
+                const pages = data.query.pages;
+                const pageId = Object.keys(pages)[0];
+
+                if (pageId === '-1') {
+                    log(resultId, `\nPage does not exist in source Wikipedia`, 'error');
+                    return;
+                }
+
+                const page = pages[pageId];
+                log(resultId, `  Page found: ${page.title}`);
+                
+                if (page.langlinks && page.langlinks.length > 0) {
+                    const zhLink = page.langlinks[0];
+                    const zhWikiUrl = zhLink.url;
+                    
+                    log(resultId, `\nSTEP 4: Extract Chinese Title`, 'step');
+                    log(resultId, `  Chinese Wikipedia URL: ${zhWikiUrl}`);
+
+                    // Extract Chinese title
+                    const zhTitleMatch = zhWikiUrl.match(/\/wiki\/(.+?)(?:\?|#|$)/);
+                    
+                    if (zhTitleMatch) {
+                        const zhTitle = zhTitleMatch[1];
+                        const zhTitleDecoded = decodeURIComponent(zhTitle);
+                        
+                        log(resultId, `  Chinese Title (encoded): ${zhTitle}`);
+                        log(resultId, `  Chinese Title (decoded): ${zhTitleDecoded}`);
+
+                        const wikiwandZhUrl = `https://www.wikiwand.com/zh-cn/articles/${zhTitle}`;
+                        
+                        log(resultId, `\nSTEP 5: Build Wikiwand URL`, 'step');
+                        log(resultId, `  Target URL: ${wikiwandZhUrl}`);
+
+                        log(resultId, `\n✅ SUCCESS!`, 'success');
+                        log(resultId, `  Redirect would occur to: ${wikiwandZhUrl}`, 'success');
+                        
+                        // Try to verify the page exists
+                        log(resultId, `\nSTEP 6: Verify page exists (optional)`, 'step');
+                        try {
+                            const verifyResponse = await fetch(wikiwandZhUrl, { method: 'HEAD' });
+                            log(resultId, `  Status: ${verifyResponse.status}`);
+                            
+                            if (verifyResponse.status === 200) {
+                                log(resultId, `  Page is accessible!`, 'success');
+                            } else if (verifyResponse.status === 404) {
+                                log(resultId, `  Page returns 404 (may still redirect in userscript)`, 'warning');
+                            }
+                        } catch (verifyError) {
+                            log(resultId, `  CORS restriction (expected in browser test)`, 'warning');
+                            log(resultId, `  Userscript uses GM_xmlhttpRequest to bypass CORS`, 'info');
+                        }
+                    } else {
+                        log(resultId, `\nCould not extract Chinese title from Wikipedia URL`, 'error');
+                    }
+                } else {
+                    log(resultId, `\nNo Chinese language link found`, 'warning');
+                }
+            } catch (error) {
+                log(resultId, `\nError: ${error.message}`, 'error');
+                log(resultId, `Stack: ${error.stack}`);
+            }
+        }
+
+        function testCase1() {
+            testRedirectLogic('https://www.wikiwand.com/pt/articles/Natsume_Yūjin-chō', 'result1');
+        }
+
+        function testCase2() {
+            testRedirectLogic('https://www.wikiwand.com/en/articles/Natsume\'s_Book_of_Friends', 'result2');
+        }
+
+        function testCase3() {
+            testRedirectLogic('https://www.wikiwand.com/pt/articles/Natsume_Y%C5%ABjin-ch%C5%8D', 'result3');
+        }
+    </script>
+</body>
+</html>
