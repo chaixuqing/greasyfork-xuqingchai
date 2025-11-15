@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wikiwand 自动跳转到简体中文
 // @namespace    http://tampermonkey.net/
-// @version      1.2.0
+// @version      1.2.1
 // @description  自动将其他语言的 Wikiwand 页面重定向到对应的简体中文页面，如果不存在则返回原页面
 // @author       You
 // @match        https://www.wikiwand.com/*/articles/*
@@ -9,6 +9,24 @@
 // @exclude      https://www.wikiwand.com/zh-hans/articles/*
 // @icon         https://www.wikiwand.com/favicon.ico
 // @grant        GM_xmlhttpRequest
+// @connect      en.wikipedia.org
+// @connect      pt.wikipedia.org
+// @connect      ja.wikipedia.org
+// @connect      de.wikipedia.org
+// @connect      fr.wikipedia.org
+// @connect      es.wikipedia.org
+// @connect      it.wikipedia.org
+// @connect      ru.wikipedia.org
+// @connect      ar.wikipedia.org
+// @connect      ko.wikipedia.org
+// @connect      nl.wikipedia.org
+// @connect      pl.wikipedia.org
+// @connect      tr.wikipedia.org
+// @connect      sv.wikipedia.org
+// @connect      he.wikipedia.org
+// @connect      zh.wikipedia.org
+// @connect      zh-tw.wikipedia.org
+// @connect      zh-hk.wikipedia.org
 // @connect      *.wikipedia.org
 // @connect      www.wikiwand.com
 // @run-at       document-start
@@ -86,12 +104,13 @@
     
     console.log('[Wikiwand 简体中文重定向] API URL:', apiUrl);
     
-    // 显示加载提示
-    showNotification('正在查找简体中文版本...', 'info');
     
     GM_xmlhttpRequest({
         method: 'GET',
         url: apiUrl,
+        headers: {
+            'User-Agent': 'Wikiwand-ZH-Redirect/1.2.1 (Tampermonkey Script)'
+        },
         onload: function(response) {
             try {
                 console.log('[Wikiwand 简体中文重定向] API 响应:', response.responseText);
@@ -129,8 +148,9 @@
                         
                         console.log('[Wikiwand 简体中文重定向] 目标 Wikiwand URL:', wikiwandZhUrl);
                         
-                        // 验证 Wikiwand 中文页面是否存在
-                        verifyWikiwandPage(wikiwandZhUrl, currentUrl);
+                        // 直接跳转到简体中文 Wikiwand 页面（Wikipedia 已保证条目存在）
+                        showNotification('找到简体中文版本，正在跳转...', 'success');
+                        window.location.replace(wikiwandZhUrl);
                     } else {
                         console.log('[Wikiwand 简体中文重定向] 无法提取中文标题');
                         showNotification('无法提取中文标题，继续浏览当前页面', 'warning');
@@ -150,73 +170,7 @@
         }
     });
     
-    // 验证 Wikiwand 页面是否存在
-    function verifyWikiwandPage(targetUrl, fallbackUrl) {
-        console.log('[Wikiwand 简体中文重定向] 验证页面:', targetUrl);
-        
-        // 尝试使用 GET 请求验证（更可靠）
-        GM_xmlhttpRequest({
-            method: 'GET',
-            url: targetUrl,
-            timeout: 5000, // 5秒超时
-            onload: function(response) {
-                console.log('[Wikiwand 简体中文重定向] 验证响应状态:', response.status);
-                console.log('[Wikiwand 简体中文重定向] 响应URL:', response.finalUrl);
-                
-                // 检查响应状态和内容
-                if (response.status === 200) {
-                    // 检查是否被重定向到错误页面
-                    const isErrorPage = response.responseText.includes('404') || 
-                                       response.responseText.includes('Page not found') ||
-                                       response.responseText.includes('页面不存在');
-                    
-                    if (!isErrorPage) {
-                        // 页面存在且有效，进行跳转
-                        console.log('[Wikiwand 简体中文重定向] 页面存在，正在跳转...');
-                        showNotification('找到简体中文版本，正在跳转...', 'success');
-                        setTimeout(() => {
-                            window.location.replace(targetUrl);
-                        }, 500);
-                    } else {
-                        console.log('[Wikiwand 简体中文重定向] 页面返回错误内容，保持原页面');
-                        showNotification('简体中文页面不存在，继续浏览当前页面', 'warning');
-                    }
-                } else if (response.status === 404) {
-                    // 页面不存在，返回原页面
-                    console.log('[Wikiwand 简体中文重定向] 页面不存在 (404)，保持原页面');
-                    showNotification('简体中文页面不存在，继续浏览当前页面', 'warning');
-                } else if (response.status >= 200 && response.status < 400) {
-                    // 其他 2xx 或 3xx 状态码，尝试跳转
-                    console.log('[Wikiwand 简体中文重定向] 状态码 ' + response.status + '，尝试跳转');
-                    showNotification('正在跳转到简体中文版本...', 'success');
-                    setTimeout(() => {
-                        window.location.replace(targetUrl);
-                    }, 500);
-                } else {
-                    // 其他错误状态码，保持原页面
-                    console.log('[Wikiwand 简体中文重定向] 错误状态码 ' + response.status + '，保持原页面');
-                    showNotification('无法访问简体中文页面，继续浏览当前页面', 'warning');
-                }
-            },
-            onerror: function(error) {
-                console.error('[Wikiwand 简体中文重定向] 验证失败:', error);
-                // 验证失败时，假设页面存在并尝试跳转
-                // Wikipedia API 返回的链接应该是准确的
-                console.log('[Wikiwand 简体中文重定向] 验证失败，基于 Wikipedia API 结果直接跳转');
-                showNotification('正在跳转到简体中文版本...', 'success');
-                setTimeout(() => {
-                    window.location.replace(targetUrl);
-                }, 500);
-            },
-            ontimeout: function() {
-                console.warn('[Wikiwand 简体中文重定向] 验证超时，直接跳转');
-                showNotification('正在跳转到简体中文版本...', 'success');
-                setTimeout(() => {
-                    window.location.replace(targetUrl);
-                }, 500);
-            }
-        });
-    }
+
     
     // 显示通知消息
     function showNotification(message, type = 'info') {
