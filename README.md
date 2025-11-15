@@ -1,160 +1,195 @@
-# Greasyfork Scripts Collection
+# Greasyfork Userscript Collection
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tampermonkey](https://img.shields.io/badge/Tampermonkey-Compatible-brightgreen.svg)](https://www.tampermonkey.net/)
+A collection of Tampermonkey/Greasemonkey userscripts for enhancing web browsing experience with automatic language redirection and text conversion.
 
-All the Tampermonkey userscripts I have published on [Greasyfork.org](https://greasyfork.org/).
+## 📁 Project Structure
 
-## 📚 Scripts
-
-### 1. Wikipedia 自动跳转到简体中文 (Wikipedia Auto Redirect to Simplified Chinese)
-
-**Version:** 1.0.2 ✅ Production Ready
-
-**Description:** Automatically redirects any language Wikipedia page to its corresponding Simplified Chinese version using the official Wikipedia API.
-
-**Features:**
-- 🌍 Supports all Wikipedia languages (300+)
-- 🎯 Uses official Wikipedia API for accurate Chinese page titles
-- ✅ Handles special characters (apostrophes, umlauts, non-Latin scripts)
-- 🔄 Forces Simplified Chinese variant (`?variant=zh-hans`)
-- ⚡ Fast and reliable redirection
-- 📊 100% tested success rate across multiple languages
-
-**Folder:** [`wikipedia-redirect/`](./wikipedia-redirect/)
-
-**Key Files:**
-- Script: [`wikipedia-to-zh-hans.js`](./wikipedia-redirect/wikipedia-to-zh-hans.js)
-- Documentation: [`README-wikipedia-to-zh-hans.md`](./wikipedia-redirect/README-wikipedia-to-zh-hans.md)
-- Test Report: [`WIKIPEDIA-API-TEST-REPORT.md`](./wikipedia-redirect/WIKIPEDIA-API-TEST-REPORT.md)
-- Interactive Test: [`test-wikipedia-redirect.html`](./wikipedia-redirect/test-wikipedia-redirect.html)
-
-**Tested Languages:** English, Japanese, German, Arabic, Spanish, French, Russian, Korean, and more!
-
----
-
-### 2. Wikiwand 自动跳转到简体中文 (Wikiwand Auto Redirect to Simplified Chinese)
-
-**Version:** 1.0.0
-
-**Description:** Automatically redirects Wikiwand pages from other languages to Simplified Chinese version. Wikiwand is a beautiful Wikipedia reader interface.
-
-**Features:**
-- 🎨 Works with Wikiwand's beautiful interface
-- 🌐 Supports multiple languages
-- 🔄 Automatic redirection to zh-cn variant
-- ⚡ Fast and seamless
-
-**Folder:** [`wikiwand-redirect/`](./wikiwand-redirect/)
-
-**Key Files:**
-- Script: [`wikiwand-to-zh-hans.js`](./wikiwand-redirect/wikiwand-to-zh-hans.js)
-- Documentation: [`README-wikiwand-to-zh-hans.md`](./wikiwand-redirect/README-wikiwand-to-zh-hans.md)
-- Interactive Test: [`test-wikiwand-redirect.html`](./wikiwand-redirect/test-wikiwand-redirect.html)
-
----
-
-### 3. 自动转换为简体中文 (Auto Convert to Simplified Chinese)
-
-**Version:** 1.1.0
-
-**Description:** Automatically converts English and various Chinese language codes in webpage URLs to Simplified Chinese (`zh-hans`) and redirects to the Simplified Chinese page. Features intelligent 404 error handling.
-
-**Features:**
-- 🌍 Auto-converts `/en` URLs to `/zh-hans` (English to Simplified Chinese)
-- 🔄 Auto-redirects `zh-hk`, `zh-tw`, `zh-hant`, `zh-sg`, `zh-mo` to `zh-hans`
-- ✅ Preserves `zh-CN`, `zh-cn`, and `zh-hans` unchanged
-- 🛡️ Smart 404 detection - returns to original page if target doesn't exist
-- ⚡ Runs at document start to avoid page flickering
-- 🌐 Works on all websites
-
-**Folder:** [`schinese-converter/`](./schinese-converter/)
-
-**Key Files:**
-- Script: [`make all web pages to schinese.js`](./schinese-converter/make%20all%20web%20pages%20to%20schinese.js)
-- Documentation: [`README-make all web pages to schinese.md`](./schinese-converter/README-make%20all%20web%20pages%20to%20schinese.md)
-
----
-
-## � Repository Structure
+This repository is organized into three main folders, each containing a complete userscript with its documentation and tests:
 
 ```
 greasyfork-xuqingchai/
-├── wikipedia-redirect/          # Wikipedia 简体中文重定向脚本
-│   ├── wikipedia-to-zh-hans.js
-│   ├── README.md
-│   ├── README-wikipedia-to-zh-hans.md
-│   ├── test-wikipedia-redirect.html
-│   ├── test-wikipedia-api.js
-│   ├── test-entries.js
-│   ├── run-comprehensive-test.js
-│   ├── INDEX.md
-│   ├── TEST-SUMMARY.md
-│   ├── WIKIPEDIA-API-TEST-REPORT.md
-│   └── TESTING-WORKFLOW-DIAGRAM.md
-│
-├── wikiwand-redirect/           # Wikiwand 简体中文重定向脚本
+├── wikiwand-redirect/          # Wikiwand automatic Chinese redirect
 │   ├── wikiwand-to-zh-hans.js
 │   ├── README.md
-│   ├── README-wikiwand-to-zh-hans.md
-│   ├── test-wikiwand-redirect.html
-│   ├── test-comprehensive-wikiwand.js
-│   └── TESTING-wikiwand.md
+│   ├── CHANGELOG-v1.2.0.md
+│   ├── test-api-user-agent.js
+│   ├── run-comprehensive-test.js
+│   └── test-entries.js
 │
-├── schinese-converter/          # 通用简体中文 URL 转换器
-│   ├── make all web pages to schinese.js
+├── wikipedia-redirect/         # Wikipedia automatic Chinese redirect
+│   ├── wikipedia-to-zh-hans.js
 │   ├── README.md
-│   └── README-make all web pages to schinese.md
+│   ├── test-wikipedia-api.js
+│   ├── run-comprehensive-test.js
+│   └── test-entries.js
 │
-├── README.md                    # 本文件
-├── LICENSE
-└── CHANGELOG-v1.2.0.md
+└── schinese-converter/         # Simplified Chinese text converter
+    ├── make all web pages to schinese.js
+    └── README.md
+```
+
+## 🚀 Scripts Overview
+
+### 1. Wikiwand Redirect (wikiwand-redirect/)
+
+**Latest Version:** 1.2.1
+
+Automatically redirects non-Chinese Wikiwand articles to their Simplified Chinese versions using Wikipedia's MediaWiki API.
+
+**Key Features:**
+- Automatic language detection and redirection
+- Wikipedia API integration for accurate Chinese article lookup
+- User-Agent header for API compliance
+- Smart fallback to original language if no Chinese version exists
+- Visual notifications for user feedback
+- Optimized performance with direct redirects
+
+**Installation:**
+```bash
+# Install in Tampermonkey from:
+wikiwand-redirect/wikiwand-to-zh-hans.js
+```
+
+**Documentation:**
+- [README](wikiwand-redirect/README.md) - Usage and features
+- [CHANGELOG](wikiwand-redirect/CHANGELOG-v1.2.0.md) - Version history
+
+**Testing:**
+```bash
+cd wikiwand-redirect
+node run-comprehensive-test.js
 ```
 
 ---
 
-## �🔧 Installation
+### 2. Wikipedia Redirect (wikipedia-redirect/)
 
-1. Install [Tampermonkey](https://www.tampermonkey.net/) browser extension
-2. Navigate to the folder of the script you want to use
-3. Open the `.js` file and copy its contents
-4. Create a new script in Tampermonkey and paste the code
-5. Save and enable the script
-6. Done! The script will run automatically
+Automatically redirects non-Chinese Wikipedia articles to their Simplified Chinese versions.
 
-**Alternative:** Install directly from Greasyfork when published.
+**Key Features:**
+- Direct Wikipedia article redirection
+- MediaWiki API integration
+- Comprehensive language support
+- Fallback behavior for articles without Chinese versions
+
+**Installation:**
+```bash
+# Install in Tampermonkey from:
+wikipedia-redirect/wikipedia-to-zh-hans.js
+```
+
+**Documentation:**
+- [README](wikipedia-redirect/README.md)
+- [API Test Report](wikipedia-redirect/WIKIPEDIA-API-TEST-REPORT.md)
+
+**Testing:**
+```bash
+cd wikipedia-redirect
+node run-comprehensive-test.js
+```
 
 ---
 
-## 🌐 Supported Browsers
+### 3. Simplified Chinese Converter (schinese-converter/)
 
-- ✅ Chrome / Chromium
-- ✅ Firefox
-- ✅ Microsoft Edge
-- ✅ Safari (with Tampermonkey or Userscripts)
-- ✅ Opera
+Converts all text on web pages to Simplified Chinese characters.
 
-## 📄 License
+**Key Features:**
+- Real-time text conversion
+- Works on any website
+- Traditional to Simplified Chinese conversion
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+**Installation:**
+```bash
+# Install in Tampermonkey from:
+schinese-converter/make all web pages to schinese.js
+```
+
+**Documentation:**
+- [README](schinese-converter/README.md)
+
+---
+
+## 🛠️ Development
+
+### Prerequisites
+
+- **Node.js** (for running tests)
+- **Tampermonkey** or **Greasemonkey** browser extension
+
+### Running Tests
+
+Each script folder contains its own test suite:
+
+```bash
+# Wikiwand redirect tests
+cd wikiwand-redirect
+node run-comprehensive-test.js
+
+# Wikipedia redirect tests
+cd wikipedia-redirect
+node run-comprehensive-test.js
+```
+
+### Test Coverage
+
+- **44 test cases** across 11 languages
+- Categories: Anime/Manga, Geography, Culture, History, Science, Technology
+- Languages: en, pt, ja, de, fr, es, it, ru, ar, ko, nl, hi, th, vi
+
+---
+
+## 📝 License
+
+See [LICENSE](LICENSE) file for details.
+
+---
 
 ## 🤝 Contributing
 
-Contributions, issues, and feature requests are welcome! Feel free to check the issues page.
+1. Choose the script folder you want to modify
+2. Make changes to the script
+3. Update the corresponding README if needed
+4. Run the test suite to ensure everything works
+5. Submit a pull request
 
-## 👤 Author
+---
 
-**chaixuqing**
+## 📚 Additional Documentation
 
-- GitHub: [@chaixuqing](https://github.com/chaixuqing)
-- Greasyfork: https://greasyfork.org/zh-CN/scripts/555885-%E8%87%AA%E5%8A%A8%E8%BD%AC%E6%8D%A2%E4%B8%BA%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87-zh-hans
+- [INDEX.md](INDEX.md) - Detailed file index
+- [ORGANIZATION.md](ORGANIZATION.md) - Repository organization guide
+- [ORGANIZATION-VISUAL.md](ORGANIZATION-VISUAL.md) - Visual organization diagram
 
-## ⭐ Show Your Support
+---
 
-Give a ⭐️ if these scripts helped you!
+## 🔗 Quick Links
 
-## 📝 Notes
+| Script | Direct Link | Version | Status |
+|--------|------------|---------|--------|
+| Wikiwand Redirect | [Install](wikiwand-redirect/wikiwand-to-zh-hans.js) | 1.2.1 | ✅ Active |
+| Wikipedia Redirect | [Install](wikipedia-redirect/wikipedia-to-zh-hans.js) | - | ✅ Active |
+| SChinese Converter | [Install](schinese-converter/make%20all%20web%20pages%20to%20schinese.js) | - | ✅ Active |
 
-- All scripts are regularly maintained and updated
-- Feedback and suggestions are always welcome
-- Please report any bugs or issues in the Issues section
+---
+
+## 🐛 Known Issues & Solutions
+
+### Wikiwand Redirect
+- **Issue:** "API 请求失败" error
+- **Solution:** Ensure all `@connect` domains are listed in the script header
+- **Fixed in:** v1.2.1
+
+### Performance
+- Redirect time: < 1 second (optimized in v1.2.1)
+- API response cache: Not yet implemented
+
+---
+
+## 📧 Contact
+
+For issues, please open a GitHub issue in the appropriate folder's context.
+
+---
+
+**Repository:** [greasyfork-xuqingchai](https://github.com/chaixuqing/greasyfork-xuqingchai)

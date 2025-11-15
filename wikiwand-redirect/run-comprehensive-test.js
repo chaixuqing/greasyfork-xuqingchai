@@ -1,5 +1,7 @@
 // Comprehensive Wikipedia API Test Runner
 const https = require('https');
+const fs = require('fs');
+const path = require('path');
 const testEntries = require('./test-entries.js');
 
 function testWikipediaAPI(lang, title) {
@@ -8,8 +10,14 @@ function testWikipediaAPI(lang, title) {
             `action=query&format=json&prop=langlinks&` +
             `titles=${encodeURIComponent(title.replace(/_/g, ' '))}&` +
             `lllang=zh&llprop=url&redirects=1&origin=*`;
-        
-        https.get(apiUrl, (res) => {
+
+        const options = {
+            headers: {
+                'User-Agent': 'Wikiwand-ZH-Redirect/1.2.1 (Tampermonkey Script)'
+            }
+        };
+
+        https.get(apiUrl, options, (res) => {
             let data = '';
             
             res.on('data', (chunk) => {
@@ -177,7 +185,16 @@ async function runTests() {
     
     console.log('\n完成时间:', new Date().toLocaleString('zh-CN'));
     console.log('='.repeat(100));
-    
+
+    // Write machine-readable summary for further analysis
+    try {
+        const outPath = path.join(__dirname, 'run-comprehensive-summary.json');
+        fs.writeFileSync(outPath, JSON.stringify(results, null, 2), 'utf8');
+        console.log(`\n已将详细结果写入: ${outPath}`);
+    } catch (e) {
+        console.error('\n写入 JSON 总结失败:', e.message);
+    }
+
     return results;
 }
 
