@@ -9,13 +9,15 @@ All the Tampermonkey userscripts I have published on [Greasyfork.org](https://gr
 
 ### 1. 自动转换为简体中文 (Auto Convert to Simplified Chinese)
 
-**Version:** 1.0.0
+**Version:** 1.1.0
 
-**Description:** Automatically converts various Chinese language codes in webpage URLs to Simplified Chinese (`zh-hans`) and redirects to the Simplified Chinese page.
+**Description:** Automatically converts English and various Chinese language codes in webpage URLs to Simplified Chinese (`zh-hans`) and redirects to the Simplified Chinese page. Features intelligent 404 error handling.
 
 **Features:**
+- 🌍 Auto-converts `/en` URLs to `/zh-hans` (English to Simplified Chinese)
 - 🔄 Auto-redirects `zh-hk`, `zh-tw`, `zh-hant`, `zh-sg`, `zh-mo` to `zh-hans`
 - ✅ Preserves `zh-CN`, `zh-cn`, and `zh-hans` unchanged
+- 🛡️ Smart 404 detection - returns to original page if target doesn't exist
 - ⚡ Runs at document start to avoid page flickering
 - 🌐 Works on all websites
 
