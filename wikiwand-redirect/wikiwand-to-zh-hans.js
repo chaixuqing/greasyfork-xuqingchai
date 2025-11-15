@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Wikiwand 自动跳转到简体中文
 // @namespace    http://tampermonkey.net/
-// @version      1.2.1
-// @description  自动将其他语言的 Wikiwand 页面重定向到对应的简体中文页面，如果不存在则返回原页面
+// @version      1.3.0
+// @description  自动将其他语言的 Wikiwand 页面重定向到对应的简体中文页面，如果不存在则返回原页面（已优化：快速重定向）
 // @author       You
 // @match        https://www.wikiwand.com/*/articles/*
 // @exclude      https://www.wikiwand.com/zh-cn/articles/*
@@ -58,6 +58,15 @@
         return;
     }
     
+    // 如果是 zh-hk / zh-tw / zh，则直接切到 zh-hans，同一个 slug
+    if (currentLang === 'zh-hk' || currentLang === 'zh-tw' || currentLang === 'zh') {
+        const targetUrl = `https://www.wikiwand.com/zh-hans/articles/${articleSlugEncoded}`;
+        console.log('[Wikiwand 简体中文重定向] 直接从中文变体跳转到 zh-hans:', targetUrl);
+        showNotification('正在跳转到简体中文版本...', 'success');
+        window.location.replace(targetUrl);
+        return;
+    }
+    
     console.log('[Wikiwand 简体中文重定向] 当前语言:', currentLang);
     console.log('[Wikiwand 简体中文重定向] 文章 Slug:', articleSlug);
     console.log('[Wikiwand 简体中文重定向] 编码的 Slug:', articleSlugEncoded);
@@ -104,12 +113,15 @@
     
     console.log('[Wikiwand 简体中文重定向] API URL:', apiUrl);
     
+    // 显示加载提示（可选 - 如果想更快，可以注释掉这行）
+    // showNotification('正在查找简体中文版本...', 'info');
     
     GM_xmlhttpRequest({
         method: 'GET',
         url: apiUrl,
+        timeout: 3000, // 3秒超时，避免长时间等待
         headers: {
-            'User-Agent': 'Wikiwand-ZH-Redirect/1.2.1 (Tampermonkey Script)'
+            'User-Agent': 'Wikiwand-ZH-Redirect/1.3.0 (Tampermonkey Script)'
         },
         onload: function(response) {
             try {
@@ -167,6 +179,10 @@
         onerror: function(error) {
             console.error('[Wikiwand 简体中文重定向] 请求失败:', error);
             showNotification('API 请求失败，继续浏览当前页面', 'error');
+        },
+        ontimeout: function() {
+            console.warn('[Wikiwand 简体中文重定向] API 请求超时');
+            showNotification('查询超时，继续浏览当前页面', 'warning');
         }
     });
     
